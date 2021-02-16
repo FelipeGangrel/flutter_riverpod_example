@@ -9,7 +9,17 @@ void main() {
   );
 }
 
-final greetingProvider = Provider((ref) => 'Hello Riverpod!');
+class IncrementNotifier extends ChangeNotifier {
+  int _value = 0;
+  int get value => _value;
+
+  void increment() {
+    _value++;
+    notifyListeners();
+  }
+}
+
+final incrementProvider = ChangeNotifierProvider((ref) => IncrementNotifier());
 
 class MyApp extends StatelessWidget {
   @override
@@ -27,23 +37,24 @@ class MyApp extends StatelessWidget {
 
 class MyWidget extends StatelessWidget {
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Riverpod example'),
       ),
       body: Center(
-        // We wrap our text widget with a consumer
-        // This way we only rebuild the Text widget when the provider
-        // changes its value
         child: Consumer(
           builder: (context, watch, child) {
-            final greeting = watch(greetingProvider);
-            return Text(greeting);
+            final incrementNotifier = watch(incrementProvider);
+            return Text(incrementNotifier.value.toString());
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read(incrementProvider).increment();
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
